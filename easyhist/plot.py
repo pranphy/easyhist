@@ -51,7 +51,7 @@ def plot1d(hist,ax=None,ebar=True,steps=False,filled=False,title=None,xlabel=Non
             yvals = fit_func(xvals,mu,sigma,A)
             ax.plot(xvals,yvals,label='$\mu={:4.2f}$  $\sigma={:4.2f}$ $\sigma/\mu={:3.2f}$%'.format(mu,sigma,sigma/mu*100))
             ax.legend()
-        
+
         elif hist.norm_erf_par:
             fit_func = utl.norm_erf_func
             params = hist.norm_erf_par[0]
@@ -86,14 +86,14 @@ def plot1d(hist,ax=None,ebar=True,steps=False,filled=False,title=None,xlabel=Non
             xvals = np.linspace(xmin,xmax,200)
             yvals = utl.binorm_func(xvals,mu1,sigma1,A2,mu2,sigma2,A2)
             #labtext  = '$\mu_1={mu1:.2f}$, $\sigma_1={sigma1:.2f}$, $\sigma_1/\mu_1={sigma1/mu1*100:.2f}$%\n $\mu_2={mu2:.2f}$, $\sigma_2={sigma2:.2f}$, $\sigma_2/\mu_2={sigma2/mu2*100:.2f}$%'
-            labtext  = ('$\mu_1={:.2f}$,' 
-                        '$\sigma_1={:.2f}$,' 
+            labtext  = ('$\mu_1={:.2f}$,'
+                        '$\sigma_1={:.2f}$,'
                         '$\sigma_1/\mu_1={:.2f}$%\n '
                         '$\mu_2={:.2f}$, '
                         '$\sigma_2={:.2f}$, '
                         '$\sigma_2/\mu_2={:.2f}$%'
-                ).format(mu1,sigma1,sigma1/mu1*100,mu2,sigma2,sigma2/mu2*100) 
-                    
+                ).format(mu1,sigma1,sigma1/mu1*100,mu2,sigma2,sigma2/mu2*100)
+
             ax.plot(xvals,yvals,label=labtext)
             ax.legend()
         if title is not None:  ax.set_title(title)
@@ -104,7 +104,7 @@ def plot1d(hist,ax=None,ebar=True,steps=False,filled=False,title=None,xlabel=Non
 def plot2d(hist,ax=None,figsize=None,cmin=1,
         title=None,xlabel=None,ylabel=None,cbar=False,cbarlabel=None,
         aspect=None,cmap=None,alpha=None,vmin=None,vmax=None,
-        contours=3,**kw):
+        contours=3,cmax=None,**kw):
     #if not isinstance(hist,mh.Hist2D):
     #    raise ValueError('Unrecognized paramter of type '.format(type(hist)))
     #else:
@@ -114,6 +114,8 @@ def plot2d(hist,ax=None,figsize=None,cmin=1,
 
         if cmin is not None:
             hist.H[hist.H < cmin] = np.nan
+        if cmax is not None:
+            hit.H[hits.H >= cmax] = np.nan
 
         ext = [min(hist.xe),max(hist.xe),min(hist.ye),max(hist.ye)]
         if aspect is None:
@@ -129,7 +131,6 @@ def plot2d(hist,ax=None,figsize=None,cmin=1,
             label = cbarlabel if cbarlabel is not  None else ""
             ax.figure.colorbar(im,ax=ax,label=label)
 
-    
         if title is not None: ax.set_title(title)
         if xlabel is not None: ax.set_xlabel(xlabel)
         if ylabel is not None: ax.set_ylabel(ylabel)
