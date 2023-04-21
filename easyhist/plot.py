@@ -27,7 +27,7 @@ def plot1d(hist,ax=None,ebar=True,steps=False,filled=False,title=None,xlabel=Non
             #X = np.array([hist.be,hist.be]).T.flatten()
             #Y = np.hstack([0,np.array([hist.H,hist.H]).T.flatten(),0])
             Y = np.array([hist.H,hist.H]).T.flatten()
-            ax.plot(X,Y)   #ax.bar(hist.be[:-1],hist.H,width=np.diff(hist.be),align='edge',fill=False,**kw)
+            #ax.plot(X,Y)   #ax.bar(hist.be[:-1],hist.H,width=np.diff(hist.be),align='edge',fill=False,**kw)
             #hp = np.hstack([hist.H[0],hist.H])
             zeros = np.zeros(len(Y))
             p = ax.plot(X,Y,**kw)
@@ -96,12 +96,25 @@ def plot1d(hist,ax=None,ebar=True,steps=False,filled=False,title=None,xlabel=Non
 
             ax.plot(xvals,yvals,label=labtext)
             ax.legend()
-        if title is not None:  ax.set_title(title)
-        if xlabel is not None: ax.set_xlabel(xlabel)
-        if ylabel is not None: ax.set_ylabel(ylabel)
+
+        if title is not None:
+            ax.set_title(title)
+        elif "title" in hist.attrib.keys():
+            ax.set_title(hist.attrib['title'])
+
+        if xlabel is not None:
+            ax.set_xlabel(xlabel)
+        elif "xlabel" in hist.attrib.keys():
+            ax.set_xlabel(hist.attrib["xlabel"])
+
+        if ylabel is not None:
+            ax.set_ylabel(ylabel)
+        elif "ylabel" in hist.attrib.keys():
+            ax.set_ylabel(hist.attrib["ylabel"])
+
         ax.ticklabel_format(axis='both',style='sci')
 
-def plot2d(hist,ax=None,figsize=None,cmin=1,
+def plot2d(hist,ax=None,figsize=None,cmin=None,
         title=None,xlabel=None,ylabel=None,cbar=False,cbarlabel=None,
         aspect=None,cmap=None,alpha=None,vmin=None,vmax=None,
         contours=3,cmax=None,**kw):
@@ -131,9 +144,20 @@ def plot2d(hist,ax=None,figsize=None,cmin=1,
             label = cbarlabel if cbarlabel is not  None else ""
             ax.figure.colorbar(im,ax=ax,label=label)
 
-        if title is not None: ax.set_title(title)
-        if xlabel is not None: ax.set_xlabel(xlabel)
-        if ylabel is not None: ax.set_ylabel(ylabel)
+
+        if title is not None:
+            ax.set_title(title)
+        elif "title" in hist.attrib.keys():
+            ax.set_title(hist.attrib['title'])
+        if xlabel is not None:
+            ax.set_xlabel(xlabel)
+        elif "xlabel" in hist.attrib.keys():
+            ax.set_xlabel(hist.attrib["xlabel"])
+        if ylabel is not None:
+            ax.set_ylabel(ylabel)
+        elif "ylabel" in hist.attrib.keys():
+            ax.set_ylabel(hist.attrib["ylabel"])
+
         ax.ticklabel_format(axis='both',style='sci')
 
     return hist

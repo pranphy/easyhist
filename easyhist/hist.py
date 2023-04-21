@@ -13,7 +13,6 @@ import scipy.optimize
 import scipy.stats
 
 import numpy as np
-import matplotlib.pyplot as plt
 from . import plot as mplt
 from . import utilities as utl
 
@@ -30,7 +29,7 @@ class Hist (object):
         raise NotImplementedError('`make_hist` method is not implemented.')
 
 class Hist1D(Hist):
-    def __init__(self,x,bins='auto',range=None,weights=None,density=False):
+    def __init__(self,x=None,bins='auto',range=None,weights=None,density=False):
         self.x = x
         self.bins = bins
         self.range = range
@@ -41,16 +40,26 @@ class Hist1D(Hist):
         self.binorm_par = None
         self.norm_erf_par = None
         self.H = None
+        self.attrib=None
 
         self.fxmin = None
         self.fxmax = None
 
-        self.__make_hist()
+        if(self.x is not None):
+            self.__make_hist()
+
+    def construct(self,H,edges,error=None,attrib=None):
+        self.H = H
+        self.be = edges
+        self.error = error
+        self.attrib = attrib
+        self.centers = (self.be[1:]+self.be[:-1])/2
+
 
     def __make_hist(self):
-        self.H, self.be = np.histogram(self.x,self.bins,self.range,density=self.density)
-        self.centers = (self.be[1:]+self.be[:-1])/2
-        self.error = np.sqrt(self.H)
+        H, be = np.histogram(self.x,self.bins,self.range,density=self.density,weights=self.weights)
+        error = np.sqrt(self.H)
+        self.construct(H,be,error)
 
     def normalize(self):
         area = np.sum(self.H*np.diff(self.be))
@@ -108,7 +117,7 @@ class Hist1D(Hist):
         if p0 is None:
             p0 = (mu,sigma,A,1,0)
 
-        params,cov = sp.optimize.curve_fit(utl.norm_erf_func,x,y,p0=p0)
+        params,cov = scipy.optimize.curve_fit(utl.norm_erf_func,x,y,p0=p0)
         self.norm_erf_par = (params,cov)
         return self
 
@@ -118,9 +127,9 @@ class Hist1D(Hist):
             x,y,mu,sigma,A = utl.get_subset_near_peak(self.H,self.centers,devs=4)
             print('My guesses are',mu,sigma,A)
             self.fxmin = min(x); self.fxmax = max(x)
-            params,cov = sp.optimize.curve_fit(utl.norm_func,x,y,p0=(mu,0.8*sigma,A))
+            params,cov = scipy.optimize.curve_fit(utl.norm_func,x,y,p0=(mu,0.8*sigma,A))
         else:
-            params,cov = sp.optimize.curve_fit(utl.norm_func,self.centers,self.H,p0=p0)
+            params,cov = scipy.optimize.curve_fit(utl.norm_func,self.centers,self.H,p0=p0)
 
         self.norm_par = (params,cov)
 
@@ -129,7 +138,7 @@ class Hist1D(Hist):
     def fit_binormal(self,p0=None):
         params,cov = None,None
         try:
-            params,cov = sp.optimize.curve_fit(utl.binorm_func,self.centers,self.H,p0=p0)
+            params,cov = scipy.optimize.curve_fit(utl.binorm_func,self.centers,self.H,p0=p0)
         except Exception:
             print('No convergance')
             params = p0
@@ -155,6 +164,7 @@ class Hist2D(Hist):
         self.weights = weights
         self.biv_params = None
         self.range = range
+        self.attrib = None
 
         if (self.x is not None) and (self.y is not None):
             self.__make_hist()
@@ -322,4 +332,30 @@ def read_root_hist2d(rh2d):
             biv = rh2d.GetBinContent(bix,biy)
             hh[ix,iy] = biv
     return hh,xe,ye
+
+def __get_attrib(hist):
+    attrib = dict(xlabel=hist.GetXaxis().GetTitle(),
+             ylabel=hist.GetYaxis().GetTitle(),
+             title=hist.GetTitle())
+    return attrib
+
+
+def hist1d_from_root(hist):
+    nbins = hist.GetNbinsX()
+    x = np.array([hist.GetBinLowEdge(i) for i in range(0,nbins+1)])
+    y = np.array([hist.GetBinContent(i) for i in range(1,nbins+1)])
+
+    errors = np.array([hist.GetBinError(i) for i in range(1,nbins+1)])
+    attrib = __get_attrib(hist)
+
+    h1 = Hist1D()
+    h1.construct(y,x,errors,attrib)
+    return h1
+
+
+def hist2d_from_root(hist):
+    h2 = Hist2D((None,None))
+    h2.H, h2.xe, h2.ye = read_root_hist2d(hist)
+    h2.attrib = __get_attrib(hist)
+    return h2
 
