@@ -48,7 +48,7 @@ class Hist1D(Hist):
         if(self.x is not None):
             self.__make_hist()
 
-    def construct(self,H,edges,error=None,attrib=None):
+    def construct(self,H,edges,error=None,attrib=dict()):
         self.H = H
         self.be = edges
         self.error = error
@@ -58,7 +58,7 @@ class Hist1D(Hist):
 
     def __make_hist(self):
         H, be = np.histogram(self.x,self.bins,self.range,density=self.density,weights=self.weights)
-        error = np.sqrt(self.H)
+        error = np.sqrt(H)
         self.construct(H,be,error)
 
     def normalize(self):
@@ -164,7 +164,7 @@ class Hist2D(Hist):
         self.weights = weights
         self.biv_params = None
         self.range = range
-        self.attrib = None
+        self.attrib = dict()
 
         if (self.x is not None) and (self.y is not None):
             self.__make_hist()

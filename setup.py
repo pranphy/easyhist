@@ -14,7 +14,7 @@ with open("README.md",'r') as fh:
 
 setuptools.setup(
     name="easyhist",
-    version="0.2.0",
+    version="0.2.4",
     author="Prakash Gautam",
     author_email="pranphy@gmail.com",
     long_description=long_description,
@@ -29,5 +29,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     include_package_data=True,
-
 )
+
